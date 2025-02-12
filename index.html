@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Kits e Serviços</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+        .total {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        input[type="checkbox"] {
+            transform: scale(1.5);
+            margin-right: 10px;
+        }
+        .section-title {
+            margin-top: 30px;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .table-container {
+            overflow-x: auto; /* Permite rolagem horizontal em telas pequenas */
+            margin-bottom: 20px;
+        }
+        @media (max-width: 600px) {
+            th, td {
+                padding: 8px; /* Reduz o padding em telas pequenas */
+            }
+            input[type="checkbox"] {
+                transform: scale(1.2); /* Reduz o tamanho das checkboxes em telas pequenas */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Lista de Kits e Serviços</h1>
+
+<!-- Tabela de Kits -->
+<div class="section-title">Kits</div>
+<div class="table-container">
+    <table id="kitsTable">
+        <thead>
+            <tr>
+                <th>Kits</th>
+                <th>Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dados dos Kits -->
+            <tr>
+                <td>Kit Protection</td>
+                <td><input type="checkbox" class="kit-price" value="2999"> R$2999</td>
+            </tr>
+            <tr>
+                <td>Kit Gold</td>
+                <td><input type="checkbox" class="kit-price" value="1799"> R$1799</td>
+            </tr>
+            <tr>
+                <td>Kit Total</td>
+                <td><input type="checkbox" class="kit-price" value="1319"> R$1319</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Tabela de Serviços -->
+<div class="section-title">Serviços</div>
+<div class="table-container">
+    <table id="servicesTable">
+        <thead>
+            <tr>
+                <th>Serviços</th>
+                <th>Valor Cheio</th>
+                <th>Valor Metade</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dados dos Serviços -->
+            <tr>
+                <td>Celular</td>
+                <td><input type="checkbox" class="full-price" value="100"> R$100</td>
+                <td><input type="checkbox" class="half-price" value="50"> R$50</td>
+            </tr>
+            <tr>
+                <td>TV</td>
+                <td><input type="checkbox" class="full-price" value="200"> R$200</td>
+                <td><input type="checkbox" class="half-price" value="100"> R$100</td>
+            </tr>
+            <tr>
+                <td>Computador</td>
+                <td><input type="checkbox" class="full-price" value="300"> R$300</td>
+                <td><input type="checkbox" class="half-price" value="150"> R$150</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="total">
+    Total: R$<span id="totalValue">0</span>
+</div>
+
+<script>
+    const totalValueElement = document.getElementById('totalValue');
+
+    // Função para adicionar eventos às checkboxes
+    function addCheckboxListeners() {
+        const kitCheckboxes = document.querySelectorAll('.kit-price');
+        const fullPriceCheckboxes = document.querySelectorAll('.full-price');
+        const halfPriceCheckboxes = document.querySelectorAll('.half-price');
+
+        // Função para garantir que apenas um kit seja selecionado
+        function enforceSingleKitSelection(event) {
+            const clickedCheckbox = event.target;
+
+            if (clickedCheckbox.checked) {
+                kitCheckboxes.forEach(checkbox => {
+                    if (checkbox !== clickedCheckbox) {
+                        checkbox.checked = false; // Desmarca os outros kits
+                    }
+                });
+            }
+
+            updateTotal();
+        }
+
+        // Função para garantir que apenas uma checkbox por linha seja selecionada (para serviços)
+        function enforceSingleCheckboxPerRow(event) {
+            const clickedCheckbox = event.target;
+            const row = clickedCheckbox.closest('tr');
+
+            if (clickedCheckbox.classList.contains('full-price')) {
+                const halfPriceCheckbox = row.querySelector('.half-price');
+                if (clickedCheckbox.checked) {
+                    halfPriceCheckbox.checked = false;
+                }
+            } else if (clickedCheckbox.classList.contains('half-price')) {
+                const fullPriceCheckbox = row.querySelector('.full-price');
+                if (clickedCheckbox.checked) {
+                    fullPriceCheckbox.checked = false;
+                }
+            }
+
+            updateTotal();
+        }
+
+        // Função para atualizar o total
+        function updateTotal() {
+            let total = 0;
+
+            // Soma os valores dos kits selecionados
+            kitCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    total += parseFloat(checkbox.value);
+                }
+            });
+
+            // Soma os valores dos serviços selecionados
+            fullPriceCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    total += parseFloat(checkbox.value);
+                }
+            });
+
+            halfPriceCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    total += parseFloat(checkbox.value);
+                }
+            });
+
+            totalValueElement.textContent = total.toFixed(2);
+        }
+
+        // Adiciona os eventos às checkboxes dos kits
+        kitCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', enforceSingleKitSelection);
+        });
+
+        // Adiciona os eventos às checkboxes dos serviços
+        fullPriceCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', enforceSingleCheckboxPerRow);
+        });
+
+        halfPriceCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', enforceSingleCheckboxPerRow);
+        });
+    }
+
+    // Adiciona os eventos quando a página carrega
+    addCheckboxListeners();
+</script>
+
+</body>
+</html>
